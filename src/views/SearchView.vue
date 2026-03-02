@@ -23,7 +23,7 @@
     <el-card v-else class="search-card" shadow="hover">
       <el-input
         v-model="searchQuery"
-        placeholder="搜索卡牌名称（仅支持英文，例如：Lightning Bolt, Black Lotus）"
+        placeholder="搜索卡牌名称（支持中文和英文，例如：闪电击 Lightning Bolt）"
         size="large"
         clearable
         @keyup.enter="handleSearch"
@@ -205,9 +205,9 @@ const handleSearch = async () => {
 
   try {
     const data = await cardAPI.searchCards(query)
-    cardStore.setCards(data.data || [])
-    cardStore.setTotalCount(data.total_cards || 0)
-    cardStore.setHasMore(data.has_more || false)
+    cardStore.setCards(data.items || [])
+    cardStore.setTotalCount(data.count || 0)
+    cardStore.setHasMore(data.page < data.total_pages || false)
   } catch (error) {
     // 检查是否是搜索无结果的情况
     if (error.response?.status === 404 || 
@@ -234,9 +234,9 @@ const loadMore = async () => {
   try {
     const nextPage = cardStore.currentPage + 1
     const data = await cardAPI.searchCards(cardStore.currentQuery, nextPage)
-    cardStore.appendCards(data.data || [])
+    cardStore.appendCards(data.items || [])
     cardStore.setCurrentPage(nextPage)
-    cardStore.setHasMore(data.has_more || false)
+    cardStore.setHasMore(data.page < data.total_pages || false)
   } catch (error) {
     cardStore.setError('加载更多失败')
     console.error('Load more error:', error)
@@ -263,8 +263,8 @@ const loadPopularCards = async () => {
   cardStore.setLoading(true)
   try {
     const data = await cardAPI.getPopularCards()
-    cardStore.setCards(data.data || [])
-    cardStore.setTotalCount(data.total_cards || 0)
+    cardStore.setCards(data.items || [])
+    cardStore.setTotalCount(data.count || 0)
   } catch (error) {
     cardStore.setError('加载热门卡牌失败')
     console.error('Load popular cards error:', error)
@@ -302,15 +302,15 @@ const searchBySet = async (setCode) => {
   try {
     // 获取系列信息
     const setsData = await cardAPI.getSets()
-    const set = setsData.data.find(s => s.code.toLowerCase() === setCode.toLowerCase())
+    const set = setsData.find(s => s.code.toLowerCase() === setCode.toLowerCase())
     if (set) {
       currentSet.value = set
     }
     
     const data = await cardAPI.getCardsBySet(setCode)
-    cardStore.setCards(data.data || [])
-    cardStore.setTotalCount(data.total_cards || 0)
-    cardStore.setHasMore(data.has_more || false)
+    cardStore.setCards(data.items || [])
+    cardStore.setTotalCount(data.count || 0)
+    cardStore.setHasMore(data.page < data.total_pages || false)
   } catch (error) {
     // 检查是否是空结果（0张牌的情况）
     if (error.response?.status === 404 || error.response?.data?.code === 'not_found') {
@@ -373,8 +373,8 @@ const getEmptyIcon = () => {
 }
 
 .set-header {
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  border: 1px solid #e5e7eb;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 16px 24px;
   margin-bottom: 24px;
@@ -387,13 +387,14 @@ const getEmptyIcon = () => {
   width: 48px;
   height: 48px;
   min-width: 48px;
-  background: white;
+  background: var(--bg-secondary);
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-color);
 }
 
 .set-icon {
@@ -409,20 +410,20 @@ const getEmptyIcon = () => {
 .set-title {
   font-size: 1.4rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--text-primary);
   margin: 0 0 4px 0;
 }
 
 .set-subtitle {
   font-size: 0.85rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin: 0;
 }
 
 .search-card {
   margin-bottom: 24px;
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
@@ -432,22 +433,22 @@ const getEmptyIcon = () => {
 }
 
 :deep(.el-input__wrapper) {
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 :deep(.el-input__wrapper:hover) {
-  border-color: #3b82f6;
+  border-color: var(--accent-color);
 }
 
 :deep(.el-input__wrapper.is-focus) {
-  border-color: #3b82f6;
+  border-color: var(--accent-color);
 }
 
 :deep(.el-button--primary) {
-  background: #3b82f6;
+  background: var(--accent-color);
   border: none;
   color: white;
   font-weight: 600;
@@ -513,9 +514,9 @@ const getEmptyIcon = () => {
   justify-content: center;
   margin-top: 32px;
   padding: 20px;
-  background: #ffffff;
+  background: var(--bg-secondary);
   border-radius: 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
 }
 
 @media (max-width: 1200px) {

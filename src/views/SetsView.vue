@@ -71,7 +71,9 @@ const fetchSets = async (retryCount = 0) => {
   loading.value = true
   try {
     const data = await cardAPI.getSets()
-    sets.value = (data.data || [])
+    // 处理不同的数据结构：可能是顶级数组，也可能是包含 items 或 data 属性的对象
+    const setsData = Array.isArray(data) ? data : (data.items || data.data || [])
+    sets.value = setsData
       .filter(set => set.released_at)
       .sort((a, b) => new Date(b.released_at) - new Date(a.released_at))
   } catch (error) {

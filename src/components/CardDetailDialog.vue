@@ -295,11 +295,11 @@ const handleClose = () => {
 
 .card-detail-image {
   padding: 24px;
-  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  background: var(--bg-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
-  border-right: 1px solid #e5e7eb;
+  border-right: 1px solid var(--border-color);
 }
 
 .detail-image {
@@ -325,7 +325,7 @@ const handleClose = () => {
 
 .card-detail-info {
   padding: 28px;
-  background: #ffffff;
+  background: var(--bg-secondary);
   position: relative;
 }
 
@@ -336,9 +336,9 @@ const handleClose = () => {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  border: none;
-  background: #f3f4f6;
-  color: #6b7280;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -348,21 +348,22 @@ const handleClose = () => {
 }
 
 .close-btn:hover {
-  background: #e5e7eb;
-  color: #374151;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--accent-color);
 }
 
 .card-detail-header {
   margin-bottom: 20px;
   padding-bottom: 16px;
-  border-bottom: 2px solid #f3f4f6;
+  border-bottom: 2px solid var(--border-color);
 }
 
 .card-detail-name {
   font-size: 1.8rem;
   font-weight: 700;
   margin-bottom: 8px;
-  color: #111827;
+  color: var(--text-primary);
   letter-spacing: -0.5px;
 }
 
@@ -395,18 +396,18 @@ const handleClose = () => {
 
 .card-detail-type {
   font-size: 1rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
 .card-detail-text {
-  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  background: var(--bg-secondary);
   padding: 20px;
   border-radius: 12px;
   margin-bottom: 20px;
   line-height: 1.8;
-  color: #374151;
-  border: 1px solid #e5e7eb;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
 }
 
 .card-detail-text :deep(.mana-symbol-img) {
@@ -437,9 +438,9 @@ const handleClose = () => {
 .flavor-text {
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px dashed #d1d5db;
+  border-top: 1px dashed var(--border-color);
   font-style: italic;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 0.95rem;
 }
 
@@ -450,17 +451,17 @@ const handleClose = () => {
 }
 
 .stat-box {
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  background: var(--bg-secondary);
   padding: 12px 20px;
   border-radius: 10px;
-  border: 1px solid #bfdbfe;
+  border: 1px solid var(--border-color);
   text-align: center;
   flex: 1;
 }
 
 .stat-label {
   font-size: 0.7rem;
-  color: #3b82f6;
+  color: var(--accent-color);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-weight: 600;
@@ -470,7 +471,7 @@ const handleClose = () => {
   font-size: 1.5rem;
   font-weight: 700;
   margin-top: 4px;
-  color: #1d4ed8;
+  color: var(--text-primary);
 }
 
 .card-detail-prices {
@@ -481,26 +482,16 @@ const handleClose = () => {
 }
 
 .price-box {
-  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  background: var(--bg-secondary);
   padding: 14px;
   border-radius: 10px;
   text-align: center;
-  border: 1px solid #bbf7d0;
-}
-
-.price-box:nth-child(2) {
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  border-color: #bfdbfe;
-}
-
-.price-box:nth-child(3) {
-  background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
-  border-color: #e9d5ff;
+  border: 1px solid var(--border-color);
 }
 
 .price-label {
   font-size: 0.75rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin-bottom: 6px;
   font-weight: 500;
 }
@@ -517,14 +508,14 @@ const handleClose = () => {
 .card-detail-legalities {
   margin-top: 20px;
   padding: 16px;
-  background: #f9fafb;
+  background: var(--bg-secondary);
   border-radius: 10px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
 }
 
 .legalities-title {
   font-size: 0.9rem;
-  color: #374151;
+  color: var(--text-primary);
   margin-bottom: 12px;
   font-weight: 600;
 }
@@ -547,7 +538,7 @@ const handleClose = () => {
   gap: 12px;
   margin-top: 24px;
   padding-top: 20px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-color);
 }
 
 .card-detail-actions .el-button {
@@ -558,7 +549,7 @@ const handleClose = () => {
 }
 
 .card-detail-actions .el-button--primary {
-  background: #3b82f6;
+  background: var(--accent-color);
   border: none;
   color: white;
   font-weight: 600;
@@ -569,13 +560,14 @@ const handleClose = () => {
 }
 
 .card-detail-actions .el-button:not(.el-button--primary) {
-  border: 1px solid #d1d5db;
-  color: #374151;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  background: var(--bg-secondary);
 }
 
 .card-detail-actions .el-button:not(.el-button--primary):hover {
-  border-color: #3b82f6;
-  color: #3b82f6;
+  border-color: var(--accent-color);
+  color: var(--accent-color);
 }
 
 @media (max-width: 768px) {

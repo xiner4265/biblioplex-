@@ -5,19 +5,19 @@
       <div class="card-image-wrapper">
         <img
           :src="imageUrl"
-          :alt="card.name"
+          :alt="card.zhs_name || card.name"
           class="card-image"
           loading="lazy"
           @error="handleImageError"
         />
       </div>
       <div class="card-info">
-        <h3 class="card-name" :title="card.name">{{ card.name }}</h3>
+        <h3 class="card-name" :title="card.zhs_name || card.name">{{ card.zhs_name || card.name }}</h3>
         <div class="card-set-row">
-          <span class="card-set">{{ card.set_name }} ({{ card.set.toUpperCase() }})</span>
+          <span class="card-set">{{ card.set_translated_name || card.set_name }} ({{ card.set.toUpperCase() }})</span>
           <div class="card-mana-cost" v-html="manaCostHtml"></div>
         </div>
-        <p class="card-type">{{ card.type_line }}</p>
+        <p class="card-type">{{ card.zhs_type_line || card.type_line }}</p>
         <div class="card-footer">
           <el-tag :type="rarityType" size="small">{{ rarityText }}</el-tag>
           <span class="card-price">{{ price }}</span>
@@ -30,15 +30,15 @@
       <div class="list-image-wrapper">
         <img
           :src="imageUrl"
-          :alt="card.name"
+          :alt="card.zhs_name || card.name"
           class="list-image"
           loading="lazy"
           @error="handleImageError"
         />
       </div>
       <div class="list-info">
-        <h3 class="list-name" :title="card.name">{{ card.name }}</h3>
-        <p class="list-type">{{ card.type_line }}</p>
+        <h3 class="list-name" :title="card.zhs_name || card.name">{{ card.zhs_name || card.name }}</h3>
+        <p class="list-type">{{ card.zhs_type_line || card.type_line }}</p>
       </div>
       <div class="list-right">
         <div class="list-mana-cost" v-html="manaCostHtml"></div>
@@ -68,7 +68,9 @@ const props = defineProps({
 const emit = defineEmits(['click'])
 
 const imageUrl = computed(() => {
-  return props.card.image_uris?.normal || 
+  return props.card.zhs_image_uris?.normal || 
+         props.card.zhs_image_uris?.small || 
+         props.card.image_uris?.normal || 
          props.card.image_uris?.small || 
          props.card.card_faces?.[0]?.image_uris?.normal || 
          ''
@@ -166,8 +168,8 @@ const handleImageError = (e) => {
 
 <style scoped>
 .card-item {
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
@@ -227,7 +229,7 @@ const handleImageError = (e) => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: #1a1a1a;
+  color: var(--text-primary);
 }
 
 .card-set-row {
@@ -239,7 +241,7 @@ const handleImageError = (e) => {
 
 .card-set {
   font-size: 0.85rem;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .card-mana-cost {
@@ -272,7 +274,7 @@ const handleImageError = (e) => {
 
 .card-type {
   font-size: 0.8rem;
-  color: #666;
+  color: var(--text-secondary);
   margin-bottom: 8px;
   white-space: nowrap;
   overflow: hidden;
@@ -284,7 +286,7 @@ const handleImageError = (e) => {
   justify-content: space-between;
   align-items: center;
   padding-top: 12px;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-top: 1px solid var(--border-color);
 }
 
 .card-price {
@@ -299,14 +301,14 @@ const handleImageError = (e) => {
   align-items: center;
   padding: 8px 16px;
   height: 60px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
 }
 
 .card-item.list:hover {
-  background: #f9fafb;
-  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+  border-color: var(--accent-color);
 }
 
 .list-image-wrapper {
@@ -336,7 +338,7 @@ const handleImageError = (e) => {
 .list-name {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text-primary);
   margin: 0 0 2px 0;
   white-space: nowrap;
   overflow: hidden;
@@ -345,7 +347,7 @@ const handleImageError = (e) => {
 
 .list-type {
   font-size: 0.8rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -377,16 +379,16 @@ const handleImageError = (e) => {
   align-items: center;
   gap: 4px;
   font-size: 0.75rem;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .list-set-icon {
   font-weight: 600;
-  color: #3b82f6;
+  color: var(--accent-color);
 }
 
 .list-set-number {
-  color: #9ca3af;
+  color: var(--text-secondary);
 }
 
 @media (max-width: 768px) {

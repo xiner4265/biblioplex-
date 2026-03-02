@@ -48,24 +48,28 @@
 
           <div class="card-text-box" v-if="currentOracleText">
             <div class="oracle-text" v-html="formattedOracleText"></div>
-            <p v-if="currentFlavorText" class="flavor-text">{{ currentFlavorText }}</p>
+            <p v-if="currentFlavorText" class="flavor-text" v-html="formattedFlavorText"></p>
           </div>
 
           <div class="card-stats" v-if="hasStats">
-            <div class="stat-item" v-if="currentFaceData.power !== undefined && currentFaceData.toughness !== undefined">
-              <span class="stat-label">力量/防御</span>
-              <span class="stat-value">{{ currentFaceData.power }}/{{ currentFaceData.toughness }}</span>
+            <div class="stat-item" v-if="currentFaceStats.defense">
+              <span class="stat-label">布防指示物</span>
+              <span class="stat-value">{{ currentFaceStats.defense }}</span>
             </div>
-            <div class="stat-item" v-if="currentFaceData.loyalty">
+            <div class="stat-item" v-else-if="currentFaceStats.power && currentFaceStats.toughness">
+              <span class="stat-label">力量/防御</span>
+              <span class="stat-value">{{ currentFaceStats.power }}/{{ currentFaceStats.toughness }}</span>
+            </div>
+            <div class="stat-item" v-if="currentFaceIsPlaneswalker && currentFaceStats.loyalty">
               <span class="stat-label">忠诚</span>
-              <span class="stat-value">{{ currentFaceData.loyalty }}</span>
+              <span class="stat-value">{{ currentFaceStats.loyalty }}</span>
             </div>
           </div>
 
           <div class="card-meta">
             <div class="meta-item">
               <span class="meta-label">系列</span>
-              <span class="meta-value">{{ card.set_name }} ({{ card.set.toUpperCase() }})</span>
+              <span class="meta-value set-link" @click="goToSet(card.set)">{{ card.set_name }} ({{ card.set.toUpperCase() }})</span>
             </div>
             <div class="meta-item">
               <span class="meta-label">稀有度</span>
@@ -118,8 +122,8 @@
               @click="switchToPrint(print.id)"
             >
               <img
-                :src="print.image_uris?.small || print.card_faces?.[0]?.image_uris?.small"
-                :alt="print.set_name"
+                :src="print.preview_image_url || print.zhs_image_uris?.small || print.image_uris?.small || print.card_faces?.[0]?.image_uris?.small"
+                :alt="print.display_name || print.zhs_name || print.name"
                 class="print-image"
                 @error="handlePrintImageError"
               />
@@ -170,41 +174,86 @@ const handleImageError = () => {
 
 // 双面牌相关计算属性
 const isDoubleFaced = computed(() => {
-  return card.value?.card_faces && card.value.card_faces.length > 1
-})
-
-const cardFaces = computed(() => {
-  return card.value?.card_faces || [card.value]
-})
-
-const currentFaceData = computed(() => {
-  return cardFaces.value[currentFace.value] || card.value
+  return card.value?.layout === 'transform'
 })
 
 const currentFaceName = computed(() => {
-  return currentFaceData.value?.name || card.value?.name
+  if (isDoubleFaced.value && currentFace.value === 1) {
+    return card.value?.other_faces?.[0]?.zhs_face_name || card.value?.other_faces?.[0]?.face_name || ''
+  }
+  return card.value?.zhs_name || card.value?.name
 })
 
 const currentTypeLine = computed(() => {
-  return currentFaceData.value?.type_line || card.value?.type_line
+  if (isDoubleFaced.value && currentFace.value === 1) {
+    return card.value?.other_faces?.[0]?.zhs_type_line || card.value?.other_faces?.[0]?.type_line || ''
+  }
+  return card.value?.zhs_type_line || card.value?.type_line || ''
+})
+
+const currentFaceStats = computed(() => {
+  if (isDoubleFaced.value && currentFace.value === 1) {
+    return {
+      defense: card.value?.other_faces?.[0]?.defense,
+      power: card.value?.other_faces?.[0]?.power,
+      toughness: card.value?.other_faces?.[0]?.toughness,
+      loyalty: card.value?.other_faces?.[0]?.loyalty
+    }
+  }
+  return {
+    defense: card.value?.defense,
+    power: card.value?.power,
+    toughness: card.value?.toughness,
+    loyalty: card.value?.loyalty
+  }
+})
+
+const currentFaceIsPlaneswalker = computed(() => {
+  return (currentTypeLine.value.includes('鹏洛客') || currentTypeLine.value.includes('Planeswalker'))
+})
+
+const currentFaceIsBattle = computed(() => {
+  return (currentTypeLine.value.includes('战役') || currentTypeLine.value.includes('Battle'))
 })
 
 const currentManaCost = computed(() => {
-  return currentFaceData.value?.mana_cost || card.value?.mana_cost
+  if (isDoubleFaced.value && currentFace.value === 1) {
+    return card.value?.other_faces?.[0]?.mana_cost || ''
+  }
+  return card.value?.mana_cost || ''
 })
 
 const currentOracleText = computed(() => {
-  return currentFaceData.value?.oracle_text || card.value?.oracle_text
+  if (isDoubleFaced.value && currentFace.value === 1) {
+    return card.value?.other_faces?.[0]?.zhs_text || card.value?.other_faces?.[0]?.oracle_text || ''
+  }
+  return card.value?.zhs_text || card.value?.oracle_text || ''
 })
 
 const currentFlavorText = computed(() => {
-  return currentFaceData.value?.flavor_text || card.value?.flavor_text
+  if (isDoubleFaced.value && currentFace.value === 1) {
+    return card.value?.other_faces?.[0]?.zhs_flavor_text || card.value?.other_faces?.[0]?.flavor_text || ''
+  }
+  return card.value?.zhs_flavor_text || card.value?.flavor_text || ''
+})
+
+const formattedFlavorText = computed(() => {
+  if (!currentFlavorText.value) return ''
+  return currentFlavorText.value
+    .replace(/\\n/g, '<br>')
+    .replace(/\n/g, '<br>')
 })
 
 const currentImageUrl = computed(() => {
-  const face = currentFaceData.value
-  return face?.image_uris?.normal || 
-         face?.image_uris?.large || 
+  if (isDoubleFaced.value && currentFace.value === 1) {
+    return card.value?.other_faces?.[0]?.zhs_image_uris?.normal ||
+           card.value?.other_faces?.[0]?.zhs_image_uris?.large ||
+           card.value?.other_faces?.[0]?.image_uris?.normal ||
+           card.value?.other_faces?.[0]?.image_uris?.large ||
+           ''
+  }
+  return card.value?.zhs_image_uris?.normal ||
+         card.value?.zhs_image_uris?.large ||
          card.value?.image_uris?.normal ||
          card.value?.image_uris?.large ||
          ''
@@ -288,8 +337,8 @@ const loadCard = async () => {
     card.value = data
     
     // 加载该卡牌的其他版本
-    if (data.oracle_id) {
-      loadCardPrints(data.oracle_id)
+    if (data.id) {
+      loadCardPrints(data.id)
     }
   } catch (err) {
     console.error('加载卡牌失败:', err)
@@ -299,11 +348,11 @@ const loadCard = async () => {
   }
 }
 
-const loadCardPrints = async (oracleId) => {
+const loadCardPrints = async (cardId) => {
   printsLoading.value = true
   try {
-    const data = await cardAPI.getCardPrints(oracleId)
-    cardPrints.value = data.data || []
+    const data = await cardAPI.getCardPrints(cardId)
+    cardPrints.value = Array.isArray(data) ? data : (data.data || [])
   } catch (err) {
     console.error('加载卡牌版本失败:', err)
     cardPrints.value = []
@@ -339,6 +388,7 @@ const currentManaCostHtml = computed(() => {
 const formattedOracleText = computed(() => {
   if (!currentOracleText.value) return ''
   return currentOracleText.value
+    .replace(/\\n/g, '<br>')
     .replace(/\n/g, '<br>')
     .replace(/\{([^}]+)\}/g, (match, symbol) => {
       const cleanSymbol = symbol.trim()
@@ -351,9 +401,9 @@ const formattedOracleText = computed(() => {
 })
 
 const hasStats = computed(() => {
-  return currentFaceData.value?.power !== undefined || 
-         currentFaceData.value?.toughness !== undefined || 
-         currentFaceData.value?.loyalty
+  return (currentFaceStats.value.defense) || 
+         (currentFaceStats.value.power && currentFaceStats.value.toughness) ||
+         (currentFaceStats.value.loyalty)
 })
 
 const rarityType = computed(() => {
@@ -452,6 +502,13 @@ const copyCardName = () => {
   }
 }
 
+const goToSet = (setCode) => {
+  router.push({
+    path: '/search',
+    query: { set: setCode }
+  })
+}
+
 onMounted(() => {
   loadCard()
 })
@@ -478,7 +535,8 @@ onMounted(() => {
 }
 
 .card-detail-container {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 32px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
@@ -632,7 +690,7 @@ onMounted(() => {
 .card-actions,
 .legality-section {
   padding: 16px 0;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .card-header {
@@ -646,7 +704,7 @@ onMounted(() => {
 .card-name {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--text-primary);
   margin: 0 0 8px 0;
   word-wrap: break-word;
   overflow-wrap: break-word;
@@ -680,7 +738,7 @@ onMounted(() => {
 
 .card-type {
   font-size: 1rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin: 0;
 }
 
@@ -691,7 +749,7 @@ onMounted(() => {
 .oracle-text {
   font-size: 1rem;
   line-height: 1.7;
-  color: #374151;
+  color: var(--text-primary);
 }
 
 .oracle-text :deep(.mana-symbol-inline) {
@@ -718,9 +776,9 @@ onMounted(() => {
 .flavor-text {
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px dashed #d1d5db;
+  border-top: 1px dashed var(--border-color);
   font-style: italic;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 0.9rem;
 }
 
@@ -739,13 +797,13 @@ onMounted(() => {
 
 .stat-label {
   font-size: 0.85rem;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .stat-value {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--text-primary);
 }
 
 .card-meta {
@@ -764,18 +822,30 @@ onMounted(() => {
 
 .meta-label {
   font-size: 0.9rem;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .meta-value {
   font-size: 0.9rem;
-  color: #1a1a1a;
+  color: var(--text-primary);
   font-weight: 500;
 }
 
 .meta-value.price {
   color: #16a34a;
   font-weight: 600;
+}
+
+.set-link {
+  color: var(--accent-color);
+  cursor: pointer;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.set-link:hover {
+  color: #2563eb;
+  text-decoration: underline;
 }
 
 .card-actions {
@@ -804,15 +874,15 @@ onMounted(() => {
 }
 
 .card-actions .el-button:first-child {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+  background: linear-gradient(135deg, var(--accent-color) 0%, #2563eb 100%) !important;
   color: white !important;
   border: none !important;
 }
 
 .card-actions .el-button:last-child {
-  background: #ffffff !important;
-  color: #4b5563 !important;
-  border: 1px solid #e5e7eb !important;
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
 }
 
 .card-actions .el-button span {
@@ -830,7 +900,7 @@ onMounted(() => {
 .legality-section h3 {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text-primary);
   margin: 0 0 16px 0;
 }
 
@@ -847,13 +917,13 @@ onMounted(() => {
   padding: 5px 10px;
   border-radius: 4px;
   font-size: 0.8rem;
-  background: #f3f4f6;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
 }
 
 .legality-format {
   font-weight: 500;
-  color: #374151;
+  color: var(--text-primary);
 }
 
 .legality-status {
@@ -886,7 +956,8 @@ onMounted(() => {
 /* 卡牌版本选择 */
 .prints-section {
   padding: 16px;
-  background: #f9fafb;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   flex: 1;
   display: flex;
@@ -899,7 +970,7 @@ onMounted(() => {
 .prints-section h3 {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text-primary);
   margin: 0 0 16px 0;
 }
 
@@ -918,17 +989,17 @@ onMounted(() => {
 }
 
 .prints-list::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--border-color);
   border-radius: 3px;
 }
 
 .prints-list::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: var(--text-secondary);
   border-radius: 3px;
 }
 
 .prints-list::-webkit-scrollbar-thumb:hover {
-  background: #a1a1a1;
+  background: var(--text-primary);
 }
 
 .print-item {
@@ -938,8 +1009,8 @@ onMounted(() => {
   transition: all 0.3s ease;
   border-radius: 8px;
   padding: 8px;
-  background: white;
-  border: 2px solid transparent;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-color);
   display: flex;
   gap: 8px;
   align-items: center;
@@ -948,11 +1019,12 @@ onMounted(() => {
 .print-item:hover {
   transform: none;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  background: white;
+  background: var(--bg-secondary);
+  border-color: var(--accent-color);
 }
 
 .print-item.is-current {
-  border-color: #3b82f6;
+  border-color: var(--accent-color);
   background: rgba(59, 130, 246, 0.1);
 }
 
@@ -971,7 +1043,7 @@ onMounted(() => {
 .print-set {
   font-size: 0.75rem;
   font-weight: 500;
-  color: #1a1a1a;
+  color: var(--text-primary);
   margin: 0 0 2px 0;
   white-space: nowrap;
   overflow: hidden;
@@ -980,13 +1052,13 @@ onMounted(() => {
 
 .print-code {
   font-size: 0.65rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin: 0 0 2px 0;
 }
 
 .print-date {
   font-size: 0.65rem;
-  color: #9ca3af;
+  color: var(--text-secondary);
   margin: 0;
 }
 

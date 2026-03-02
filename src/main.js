@@ -11,9 +11,17 @@ import router from './router'
 const app = createApp(App)
 const pinia = createPinia()
 
+// 检测本地存储中的主题设置
+const savedTheme = localStorage.getItem('theme')
+const isDark = savedTheme === 'dark'
+
 app.use(pinia)
 app.use(router)
-app.use(ElementPlus, { locale: zhCn })
+app.use(ElementPlus, {
+  locale: zhCn,
+  // 配置Element Plus的深色模式
+  dark: isDark
+})
 
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component)

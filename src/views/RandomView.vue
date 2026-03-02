@@ -74,8 +74,8 @@ const getRandomCard = async () => {
 
 .random-card {
   text-align: center;
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 16px;
   margin-bottom: 32px;
   padding: 32px;
@@ -88,23 +88,23 @@ const getRandomCard = async () => {
 
 .random-icon {
   font-size: 64px;
-  color: #3b82f6;
+  color: var(--accent-color);
   margin-bottom: 16px;
 }
 
 .random-header h2 {
   font-size: 1.8rem;
   margin-bottom: 12px;
-  color: #1a1a1a;
+  color: var(--text-primary);
 }
 
 .random-header p {
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 1rem;
 }
 
 .random-btn {
-  background: #3b82f6;
+  background: var(--accent-color);
   border: none;
   padding: 16px 40px;
   font-size: 1.1rem;

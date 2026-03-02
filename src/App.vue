@@ -9,46 +9,52 @@
               <h1>斯翠海文大书库茂典阁</h1>
             </div>
           </div>
-          <el-menu
-            :default-active="activeMenu"
-            mode="horizontal"
-            :ellipsis="false"
-            @select="handleMenuSelect"
-          >
-            <el-menu-item index="home">
-              <el-icon><HomeFilled /></el-icon>
-              <span>首页</span>
-            </el-menu-item>
-            <el-menu-item index="search">
-              <el-icon><Search /></el-icon>
-              <span>搜索</span>
-            </el-menu-item>
-            <el-menu-item index="random">
-              <el-icon><MagicStick /></el-icon>
-              <span>随机卡牌</span>
-            </el-menu-item>
-          </el-menu>
+          <div class="menu-container">
+            <el-menu
+              :default-active="activeMenu"
+              mode="horizontal"
+              :ellipsis="false"
+              @select="handleMenuSelect"
+            >
+              <el-menu-item index="home">
+                <el-icon><HomeFilled /></el-icon>
+                <span>首页</span>
+              </el-menu-item>
+            </el-menu>
+            <div class="theme-toggle">
+              <el-button 
+                :icon="isDark ? 'Moon' : 'Sunny'" 
+                circle 
+                @click="toggleTheme"
+                :title="isDark ? '切换到浅色模式' : '切换到深色模式'"
+              />
+            </div>
+          </div>
         </div>
       </el-header>
       <el-main>
         <router-view />
       </el-main>
       <el-footer>
-        <p>斯翠海文大书库茂典阁 - 使用 Scryfall API</p>
-        <p>万智牌是威世智公司的注册商标。本网站仅供学习交流使用。</p>
+        <p>© 2026 斯翠海文大书库茂典阁 - 万智牌卡牌查询工具</p>
+        <p>本网站使用 Scryfall API 提供数据服务，仅供学习交流使用</p>
+        <p>Magic: The Gathering 及相关商标均为 Wizards of the Coast LLC 的注册商标</p>
+        <p>本网站非官方网站，与 Wizards of the Coast 无关联</p>
       </el-footer>
     </el-container>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { HomeFilled, Sunny, Moon } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
 
 const activeMenu = computed(() => route.name || 'home')
+const isDark = ref(false)
 
 const goHome = () => {
   router.push('/')
@@ -70,14 +76,77 @@ const handleMenuSelect = (index) => {
       break
   }
 }
+
+const toggleTheme = () => {
+  isDark.value = !isDark.value
+  document.documentElement.classList.toggle('dark', isDark.value)
+  localStorage.setItem('theme', isDark.value ? 'dark' : 'light')
+}
+
+onMounted(() => {
+  // 从本地存储读取主题设置
+  const savedTheme = localStorage.getItem('theme')
+  if (savedTheme === 'dark') {
+    isDark.value = true
+    document.documentElement.classList.add('dark')
+  }
+})
 </script>
+
+<style>
+/* 全局CSS变量 - 浅色模式 */
+:root {
+  --bg-primary: #f8fafc;
+  --bg-secondary: rgba(255, 255, 255, 0.95);
+  --text-primary: #1a1a1a;
+  --text-secondary: rgba(0, 0, 0, 0.7);
+  --border-color: rgba(0, 0, 0, 0.1);
+  --accent-color: #3b82f6;
+  --bg-blur: rgba(255, 255, 255, 0.95);
+}
+
+/* 深色模式变量 */
+.dark {
+  --bg-primary: #0f172a;
+  --bg-secondary: rgba(15, 23, 42, 0.95);
+  --text-primary: #f1f5f9;
+  --text-secondary: rgba(241, 245, 249, 0.7);
+  --border-color: rgba(255, 255, 255, 0.1);
+  --accent-color: #60a5fa;
+  --bg-blur: rgba(15, 23, 42, 0.95);
+}
+
+
+
+/* 深色模式下的Element Plus遮罩样式 */
+.dark .el-overlay {
+  background-color: rgba(0, 0, 0, 0.6) !important;
+}
+
+.dark .el-dialog__wrapper {
+  background-color: rgba(0, 0, 0, 0.6) !important;
+}
+
+.dark .el-drawer__wrapper {
+  background-color: rgba(0, 0, 0, 0.6) !important;
+}
+</style>
 
 <style scoped>
 #app {
   min-height: 100vh;
   background: 
-    linear-gradient(135deg, rgba(245, 247, 250, 0.7) 0%, rgba(240, 242, 245, 0.8) 100%),
+    linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)),
     url('/images/biblioplex-bg.jpg') center/cover no-repeat fixed;
+  transition: background 0.3s ease;
+}
+
+/* 深色模式下的背景图片调整 */
+.dark #app {
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+    url('/images/biblioplex-bg.jpg') center/cover no-repeat fixed;
+  transition: background 0.3s ease;
 }
 
 :deep(.el-container) {
@@ -85,10 +154,11 @@ const handleMenuSelect = (index) => {
 }
 
 :deep(.el-header) {
-  background: rgba(255, 255, 255, 0.95);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
   padding: 0;
   backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
 }
 
 .header-content {
@@ -101,6 +171,17 @@ const handleMenuSelect = (index) => {
   height: 100%;
   width: 100%;
   box-sizing: border-box;
+}
+
+.menu-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
 }
 
 .logo {
@@ -124,18 +205,20 @@ const handleMenuSelect = (index) => {
   object-fit: contain;
   background: rgba(255, 255, 255, 0.9);
   padding: 2px;
+  transition: all 0.3s ease;
 }
 
 .logo-text h1 {
   font-size: 1.2rem;
   font-weight: 700;
-  color: #3b82f6;
+  color: var(--accent-color);
   margin: 0;
   line-height: 1.3;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 250px;
+  transition: color 0.3s ease;
 }
 
 .logo-text .subtitle {
@@ -153,19 +236,20 @@ const handleMenuSelect = (index) => {
 }
 
 :deep(.el-menu-item) {
-  color: rgba(0, 0, 0, 0.7);
+  color: var(--text-secondary);
   border-bottom: 2px solid transparent;
+  transition: all 0.3s ease;
 }
 
 :deep(.el-menu-item:hover) {
   background: transparent;
-  color: #3b82f6;
+  color: var(--accent-color);
 }
 
 :deep(.el-menu-item.is-active) {
   background: transparent;
-  color: #3b82f6;
-  border-bottom-color: #3b82f6;
+  color: var(--accent-color);
+  border-bottom-color: var(--accent-color);
 }
 
 :deep(.el-main) {
@@ -173,15 +257,16 @@ const handleMenuSelect = (index) => {
 }
 
 :deep(.el-footer) {
-  background: rgba(255, 255, 255, 0.95);
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
   text-align: center;
-  color: rgba(0, 0, 0, 0.7);
+  color: var(--text-secondary);
   font-size: 0.9rem;
   padding: 20px 24px;
   backdrop-filter: blur(10px);
   height: auto !important;
   min-height: 60px;
+  transition: all 0.3s ease;
 }
 
 :deep(.el-footer p) {

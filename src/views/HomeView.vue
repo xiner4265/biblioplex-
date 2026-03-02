@@ -12,12 +12,12 @@
         <div class="search-container">
           <div class="search-box">
             <el-input
-              v-model="searchQuery"
-              placeholder="搜索卡牌名称（英文）"
-              size="large"
-              clearable
-              @keyup.enter="goToSearch"
-            >
+          v-model="searchQuery"
+          placeholder="搜索卡牌名称（支持中文和英文）"
+          size="large"
+          clearable
+          @keyup.enter="goToSearch"
+        >
               <template #prefix>
                 <el-icon class="search-icon"><Search /></el-icon>
               </template>
@@ -178,7 +178,7 @@ const advancedForm = reactive({
 
 const latestSets = computed(() => {
   return sets.value
-    .filter(set => set.released_at && new Date(set.released_at) <= new Date())
+    .filter(set => set.released_at && new Date(set.released_at) <= new Date() && (set.set_type === 'expansion' || set.set_type === 'core'))
     .sort((a, b) => new Date(b.released_at) - new Date(a.released_at))
     .slice(0, 8)
 })
@@ -188,7 +188,7 @@ const fetchSets = async (retryCount = 0) => {
   try {
     const data = await cardAPI.getSets()
     console.log('Sets data:', data)
-    sets.value = data.data || []
+    sets.value = Array.isArray(data) ? data : (data.data || [])
     console.log('Latest sets:', latestSets.value)
   } catch (error) {
     console.error('获取系列失败:', error)
@@ -280,8 +280,8 @@ const buildAdvancedQuery = () => {
 const goToBiblioplex = async () => {
   try {
     const data = await cardAPI.searchCards('The Biblioplex')
-    if (data.data && data.data.length > 0) {
-      const card = data.data[0]
+    if (data.items && data.items.length > 0) {
+      const card = data.items[0]
       router.push(`/card/${card.id}`)
     } else {
       ElMessage.error('未找到 The Biblioplex 卡牌')
@@ -340,6 +340,7 @@ onMounted(() => {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   background: rgba(255, 255, 255, 0.9);
   padding: 4px;
+  transition: all 0.3s ease;
 }
 
 .hero-title {
@@ -347,23 +348,26 @@ onMounted(() => {
   font-weight: 700;
   color: #1a1a1a;
   margin: 0 0 8px 0;
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, var(--accent-color) 0%, #1d4ed8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  transition: all 0.3s ease;
 }
 
 .hero-subtitle {
   font-size: 1.2rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin: 0 0 8px 0;
   font-weight: 500;
+  transition: color 0.3s ease;
 }
 
 .hero-description {
   font-size: 1rem;
-  color: #9ca3af;
+  color: var(--text-secondary);
   margin: 0 0 32px 0;
+  transition: color 0.3s ease;
 }
 
 .search-container {
@@ -380,12 +384,13 @@ onMounted(() => {
   gap: 12px;
   width: 100%;
   max-width: 800px;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--bg-secondary);
   border-radius: 16px;
   padding: 8px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
 }
 
 .search-box :deep(.el-input) {
@@ -404,11 +409,14 @@ onMounted(() => {
   font-size: 1.1rem;
   background: transparent;
   border: none;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
 }
 
 .search-icon {
   font-size: 1.2rem;
-  color: #3b82f6;
+  color: var(--accent-color);
+  transition: color 0.3s ease;
 }
 
 .search-btn {
@@ -420,7 +428,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  background: linear-gradient(135deg, var(--accent-color) 0%, #2563eb 100%);
   border: none;
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
   transition: all 0.3s ease;
@@ -455,36 +463,32 @@ onMounted(() => {
   align-items: center !important;
   gap: 8px !important;
   transition: all 0.3s ease !important;
-  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border: 1px solid var(--border-color) !important;
   justify-content: center !important;
   width: 100% !important;
-  background: rgba(255, 255, 255, 0.95) !important;
-  color: #4b5563 !important;
+  background: var(--bg-secondary) !important;
+  color: var(--text-secondary) !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
   box-sizing: border-box !important;
 }
 
 .quick-actions .el-button:hover {
-  background: white !important;
+  background: var(--bg-secondary) !important;
   transform: translateY(-2px) !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
-  border-color: #3b82f6 !important;
+  border-color: var(--accent-color) !important;
 }
 
 .quick-actions .el-button .el-icon {
   font-size: 16px !important;
-  color: #3b82f6 !important;
+  color: var(--accent-color) !important;
+  transition: color 0.3s ease !important;
 }
 
 .quick-actions .el-button span {
   font-size: 1rem !important;
+  transition: color 0.3s ease !important;
 }
-
-
-
-
-
-
 
 .sets-section {
   padding: 40px 24px;
@@ -495,9 +499,10 @@ onMounted(() => {
 .section-title {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text-primary);
   margin: 0 0 24px 0;
   text-align: center;
+  transition: color 0.3s ease;
 }
 
 .section-title.clickable {
@@ -511,7 +516,7 @@ onMounted(() => {
 }
 
 .section-title.clickable:hover {
-  color: #3b82f6;
+  color: var(--accent-color);
   background: rgba(59, 130, 246, 0.1);
 }
 
@@ -527,9 +532,9 @@ onMounted(() => {
   align-items: center;
   gap: 16px;
   padding: 16px;
-  background: #ffffff;
+  background: var(--bg-secondary);
   border-radius: 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -537,7 +542,7 @@ onMounted(() => {
 .set-card:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transform: translateY(-2px);
-  border-color: #3b82f6;
+  border-color: var(--accent-color);
 }
 
 .set-card.skeleton {
@@ -547,7 +552,7 @@ onMounted(() => {
 .set-card.skeleton:hover {
   box-shadow: none;
   transform: none;
-  border-color: #e5e7eb;
+  border-color: var(--border-color);
 }
 
 .set-image-container {
@@ -559,6 +564,7 @@ onMounted(() => {
   background: #f3f4f6;
   border-radius: 8px;
   flex-shrink: 0;
+  transition: background 0.3s ease;
 }
 
 .set-icon {
@@ -575,23 +581,26 @@ onMounted(() => {
 .set-name {
   font-size: 1rem;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text-primary);
   margin: 0 0 4px 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: color 0.3s ease;
 }
 
 .set-code {
   font-size: 0.85rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin: 0 0 2px 0;
+  transition: color 0.3s ease;
 }
 
 .set-date {
   font-size: 0.75rem;
-  color: #9ca3af;
+  color: var(--text-secondary);
   margin: 0;
+  transition: color 0.3s ease;
 }
 
 /* 响应式设计 */
