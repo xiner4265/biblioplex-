@@ -13,7 +13,7 @@
           <div class="search-box">
             <el-input
               v-model="searchQuery"
-              placeholder="搜索卡牌名称（英文）..."
+              placeholder="搜索卡牌名称（英文）"
               size="large"
               clearable
               @keyup.enter="goToSearch"
@@ -29,15 +29,11 @@
           </div>
           
           <div class="quick-actions">
-            <el-button class="action-btn primary" @click="goToSearch">
-              <el-icon><Search /></el-icon>
-              <span>搜索卡牌</span>
-            </el-button>
-            <el-button class="action-btn secondary" @click="goToRandom">
+            <el-button class="action-btn" @click="goToRandom">
               <el-icon><MagicStick /></el-icon>
               <span>随机卡牌</span>
             </el-button>
-            <el-button class="action-btn secondary" @click="showAdvancedDialog = true">
+            <el-button class="action-btn" @click="showAdvancedDialog = true">
               <el-icon><Setting /></el-icon>
               <span>高级搜索</span>
             </el-button>
@@ -102,7 +98,7 @@
   <el-dialog
     v-model="showAdvancedDialog"
     title="高级搜索"
-    width="600px"
+    width="350px"
     :close-on-click-modal="false"
   >
     <el-form :model="advancedForm" label-position="top">
@@ -152,8 +148,10 @@
     </el-form>
     
     <template #footer>
-      <el-button @click="showAdvancedDialog = false">取消</el-button>
-      <el-button type="primary" @click="handleAdvancedSearch">搜索</el-button>
+      <div style="display: flex; justify-content: center; gap: 15px; width: 100%; padding: 10px 0;">
+        <el-button @click="showAdvancedDialog = false" style="width: 80px;">取消</el-button>
+        <el-button type="primary" @click="handleAdvancedSearch" style="width: 80px;">搜索</el-button>
+      </div>
     </template>
   </el-dialog>
 </template>
@@ -315,6 +313,7 @@ onMounted(() => {
 
 .hero-content {
   max-width: 1000px;
+  width: 100%;
 }
 
 .hero-title-area {
@@ -372,19 +371,25 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   gap: 20px;
+  width: 100%;
 }
 
 .search-box {
   display: flex;
   align-items: center;
   gap: 12px;
-  width: 800px;
+  width: 100%;
+  max-width: 800px;
   background: rgba(255, 255, 255, 0.95);
   border-radius: 16px;
   padding: 8px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.search-box :deep(.el-input) {
+  flex: 1;
 }
 
 .search-box :deep(.el-input__wrapper) {
@@ -419,6 +424,7 @@ onMounted(() => {
   border: none;
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
   transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
 .search-btn:hover {
@@ -431,48 +437,54 @@ onMounted(() => {
   gap: 16px;
   justify-content: center;
   flex-wrap: wrap;
-}
-
-.action-btn {
-  border-radius: 12px;
-  padding: 12px 24px;
-  font-size: 1rem;
-  font-weight: 500;
-  display: flex;
+  width: 100%;
+  max-width: 500px;
   align-items: center;
-  gap: 8px;
-  transition: all 0.3s ease;
-  border: none;
-}
-
-.action-btn.primary {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-}
-
-.action-btn.primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
-}
-
-.action-btn.secondary {
-  background: rgba(255, 255, 255, 0.9);
-  color: #4b5563;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.action-btn.secondary:hover {
-  background: white;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .quick-actions .el-button {
-  padding: 16px 32px;
-  font-size: 1rem;
+  flex: 1;
+  min-width: 180px;
+  height: 56px !important;
+  margin: 0 !important;
+  border-radius: 12px !important;
+  padding: 0 32px !important;
+  font-size: 1rem !important;
+  font-weight: 500 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  transition: all 0.3s ease !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  justify-content: center !important;
+  width: 100% !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #4b5563 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  box-sizing: border-box !important;
 }
+
+.quick-actions .el-button:hover {
+  background: white !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+  border-color: #3b82f6 !important;
+}
+
+.quick-actions .el-button .el-icon {
+  font-size: 16px !important;
+  color: #3b82f6 !important;
+}
+
+.quick-actions .el-button span {
+  font-size: 1rem !important;
+}
+
+
+
+
+
+
 
 .sets-section {
   padding: 40px 24px;
@@ -582,7 +594,29 @@ onMounted(() => {
   margin: 0;
 }
 
+/* 响应式设计 */
+@media (max-width: 1024px) {
+  /* iPad 横屏 */
+  .hero-section {
+    padding: 60px 20px;
+  }
+  
+  .hero-icon {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .hero-title {
+    font-size: 2.2rem;
+  }
+  
+  .sets-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+}
+
 @media (max-width: 768px) {
+  /* iPad 竖屏 */
   .hero-section {
     padding: 40px 16px;
   }
@@ -600,14 +634,359 @@ onMounted(() => {
     font-size: 1rem;
   }
 
+  .search-box {
+    padding: 6px;
+  }
+  
+  .search-box :deep(.el-input__inner) {
+    height: 40px;
+    font-size: 1rem;
+  }
+  
+  .search-btn {
+    height: 40px;
+    padding: 0 16px;
+    font-size: 0.9rem;
+  }
+
   .quick-actions {
     flex-direction: column;
     align-items: center;
+    gap: 12px;
   }
 
+  .quick-actions {
+    max-width: 400px !important;
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+  
   .quick-actions .el-button {
-    width: 100%;
-    max-width: 280px;
+    width: 100% !important;
+    max-width: 280px !important;
+    height: 52px !important;
+    padding: 0 24px !important;
+    min-width: 160px !important;
+  }
+  
+  .quick-actions .el-button span {
+    font-size: 0.9rem !important;
+  }
+  
+  .quick-actions .el-button .el-icon {
+    font-size: 14px !important;
+  }
+  
+  .sets-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+  
+  .set-card {
+    padding: 12px;
+    gap: 12px;
+  }
+  
+  .set-image-container {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .set-icon {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .set-name {
+    font-size: 0.9rem;
+  }
+  
+  .set-code {
+    font-size: 0.75rem;
+  }
+  
+  .set-date {
+    font-size: 0.65rem;
+  }
+}
+
+@media (max-width: 480px) {
+  /* 安卓手机 */
+  .hero-section {
+    padding: 30px 12px;
+  }
+  
+  .hero-icon {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 16px;
+  }
+  
+  .hero-title {
+    font-size: 1.5rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 0.9rem;
+  }
+  
+  .hero-description {
+    font-size: 0.85rem;
+    margin-bottom: 24px;
+  }
+  
+  .search-box {
+    gap: 8px;
+  }
+  
+  .search-btn {
+    padding: 0 12px;
+    font-size: 0.8rem;
+  }
+  
+  .search-btn span {
+    display: none;
+  }
+  
+  .action-btn {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
+  
+  .sets-section {
+    padding: 20px 16px;
+  }
+  
+  .section-title {
+    font-size: 1.2rem;
+  }
+  
+  .sets-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+  
+  .set-card {
+    flex-direction: column;
+    text-align: center;
+    padding: 16px;
+  }
+  
+  .set-info {
+    text-align: center;
+  }
+  
+  .set-name {
+    white-space: normal;
+    overflow: visible;
+  }
+  
+  /* 高级搜索弹窗响应式 */
+  :deep(.el-dialog) {
+    width: 98% !important;
+    max-width: 280px !important;
+    margin: 0 !important;
+    top: 1% !important;
+    max-height: 95vh !important;
+    height: 95vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+  
+  :deep(.el-dialog__header) {
+    padding: 8px 12px !important;
+    flex-shrink: 0 !important;
+    min-height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+  
+  :deep(.el-dialog__header .el-dialog__title) {
+    font-size: 0.9rem !important;
+    line-height: 1.2 !important;
+  }
+  
+  :deep(.el-dialog__body) {
+    padding: 10px 12px !important;
+    flex: 1 !important;
+    overflow-y: auto !important;
+    max-height: none !important;
+    min-height: 120px !important;
+  }
+  
+  /* 弹窗容器 */
+  :deep(.el-dialog) {
+    width: 85% !important;
+    max-width: 220px !important;
+    margin: 0 !important;
+    top: 1% !important;
+    max-height: 95vh !important;
+    height: 95vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+  
+  /* 弹窗底部按钮区域 - 使用更具体的选择器 */
+  :deep(.el-dialog .el-dialog__footer) {
+    padding: 10px 15px !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 15px !important;
+    min-height: 50px !important;
+    background: white !important;
+    border-top: 1px solid #eee !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* 确保样式优先级 */
+  :deep(.el-dialog .el-dialog__footer) {
+    justify-content: center !important;
+  }
+  
+  /* 按钮样式 */
+  :deep(.el-dialog .el-dialog__footer .el-button) {
+    flex: none !important;
+    margin: 0 !important;
+    width: 80px !important;
+    height: 32px !important;
+  }
+  
+  :deep(.el-checkbox-group) {
+    flex-wrap: wrap !important;
+    gap: 2px !important;
+  }
+  
+  :deep(.el-checkbox-button) {
+    margin-right: 2px !important;
+    margin-bottom: 2px !important;
+    padding: 2px !important;
+    font-size: 0.7rem !important;
+    min-width: auto !important;
+  }
+  
+  :deep(.el-checkbox-button img) {
+    width: 12px !important;
+    height: 12px !important;
+  }
+  
+  :deep(.el-form-item) {
+    margin-bottom: 8px !important;
+  }
+  
+  :deep(.el-form-item__label) {
+    font-size: 0.7rem !important;
+    margin-bottom: 4px !important;
+    line-height: 1.2 !important;
+  }
+  
+  :deep(.el-input__inner) {
+    font-size: 0.7rem !important;
+    height: 30px !important;
+    padding: 0 10px !important;
+  }
+  
+  :deep(.el-select) {
+    font-size: 0.7rem !important;
+  }
+  
+  :deep(.el-select .el-input__inner) {
+    height: 30px !important;
+  }
+  
+  :deep(.el-button) {
+    font-size: 0.7rem !important;
+    padding: 4px 8px !important;
+    height: 28px !important;
+    line-height: 28px !important;
+  }
+  
+  :deep(.el-dialog__footer .el-button) {
+    flex: none !important;
+    margin: 0 !important;
+    width: 80px !important;
+  }
+  
+  /* 确保弹窗内容不会溢出 */
+  :deep(.el-dialog__wrapper) {
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    min-height: 100vh !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* 确保滚动条正常显示 */
+  :deep(.el-dialog__body::-webkit-scrollbar) {
+    width: 4px !important;
+  }
+  
+  :deep(.el-dialog__body::-webkit-scrollbar-track) {
+    background: #f1f1f1 !important;
+  }
+  
+  :deep(.el-dialog__body::-webkit-scrollbar-thumb) {
+    background: #c1c1c1 !important;
+    border-radius: 2px !important;
+  }
+  
+  /* 确保弹窗在小屏幕上完全可见 */
+  @media (max-height: 667px) {
+    :deep(.el-dialog) {
+      max-height: 95vh !important;
+      height: 95vh !important;
+      top: 2.5% !important;
+    }
+    
+    :deep(.el-dialog__header) {
+      min-height: 36px !important;
+      padding: 6px 10px !important;
+    }
+    
+    :deep(.el-dialog__header .el-dialog__title) {
+      font-size: 0.8rem !important;
+    }
+    
+    :deep(.el-dialog__body) {
+      padding: 8px 10px !important;
+      min-height: 100px !important;
+    }
+    
+    :deep(.el-dialog__footer) {
+      min-height: 36px !important;
+      padding: 6px 10px !important;
+    }
+    
+    :deep(.el-form-item) {
+      margin-bottom: 6px !important;
+    }
+    
+    :deep(.el-form-item__label) {
+      font-size: 0.65rem !important;
+      margin-bottom: 3px !important;
+    }
+    
+    :deep(.el-input__inner) {
+      font-size: 0.65rem !important;
+      height: 28px !important;
+      padding: 0 8px !important;
+    }
+    
+    :deep(.el-select .el-input__inner) {
+      height: 28px !important;
+    }
+    
+    :deep(.el-button) {
+      font-size: 0.65rem !important;
+      height: 26px !important;
+      line-height: 26px !important;
+    }
   }
 }
 </style>

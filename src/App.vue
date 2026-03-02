@@ -7,7 +7,6 @@
             <img src="/images/The Biblioplex s.png" alt="茂典阁" class="logo-img" />
             <div class="logo-text">
               <h1>斯翠海文大书库茂典阁</h1>
-              <span class="subtitle">Strixhaven Biblioplex - MTGA卡牌查询</span>
             </div>
           </div>
           <el-menu
@@ -100,6 +99,8 @@ const handleMenuSelect = (index) => {
   align-items: center;
   justify-content: space-between;
   height: 100%;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .logo {
@@ -131,11 +132,19 @@ const handleMenuSelect = (index) => {
   color: #3b82f6;
   margin: 0;
   line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 250px;
 }
 
 .logo-text .subtitle {
   font-size: 0.7rem;
   color: rgba(255, 255, 255, 0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
 }
 
 :deep(.el-menu) {
@@ -180,7 +189,20 @@ const handleMenuSelect = (index) => {
   line-height: 1.5;
 }
 
+@media (max-width: 1024px) {
+  /* iPad 横屏 */
+  .logo-text h1 {
+    font-size: 1.1rem;
+    max-width: 180px;
+  }
+  
+  .logo-text .subtitle {
+    max-width: 180px;
+  }
+}
+
 @media (max-width: 768px) {
+  /* iPad 竖屏 */
   .header-content {
     flex-direction: column;
     gap: 16px;
@@ -194,11 +216,92 @@ const handleMenuSelect = (index) => {
 
   .logo-text h1 {
     font-size: 1.1rem;
+    max-width: 250px;
+  }
+  
+  .logo-text .subtitle {
+    max-width: 250px;
   }
 
   :deep(.el-menu) {
     width: 100%;
     justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  :deep(.el-menu-item) {
+    padding: 0 10px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* 安卓手机 */
+  .header-content {
+    padding: 8px 12px !important;
+    gap: 8px !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  .logo {
+    gap: 6px !important;
+    padding: 4px !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+  
+  .logo-img {
+    width: 32px !important;
+    height: 32px !important;
+  }
+  
+  .logo-text {
+    text-align: center !important;
+  }
+  
+  .logo-text h1 {
+    font-size: 0.8rem !important;
+    max-width: 200px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    line-height: 1.2 !important;
+    margin: 0 !important;
+  }
+  
+  .logo-text .subtitle {
+    display: none !important;
+  }
+  
+  :deep(.el-menu) {
+    width: 100% !important;
+    justify-content: center !important;
+    flex-wrap: wrap !important;
+  }
+  
+  :deep(.el-menu-item) {
+    font-size: 0.7rem !important;
+    padding: 0 8px !important;
+    margin: 0 !important;
+    height: 36px !important;
+    line-height: 36px !important;
+  }
+  
+  :deep(.el-menu-item .el-icon) {
+    font-size: 12px !important;
+    margin-right: 4px !important;
+  }
+  
+  :deep(.el-menu-item span) {
+    font-size: 0.7rem !important;
+  }
+  
+  :deep(.el-header) {
+    padding: 0 !important;
+    height: auto !important;
+    min-height: 80px !important;
   }
 }
 </style>

@@ -486,6 +486,7 @@ onMounted(() => {
   overflow-y: visible;
   display: flex;
   gap: 24px;
+  flex-direction: row;
 }
 
 .left-section {
@@ -504,6 +505,50 @@ onMounted(() => {
   flex-direction: column;
   max-height: 100%;
   height: fit-content;
+}
+
+/* 响应式设计 */
+@media (max-width: 1024px) {
+  /* iPad 横屏 */
+  .card-detail-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .left-section {
+    width: 100%;
+    max-width: none;
+  }
+  
+  .right-section {
+    width: 100%;
+    max-width: none;
+    min-width: auto;
+    margin-top: 24px;
+  }
+  
+  .prints-section {
+    max-height: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  /* iPad 竖屏 */
+  .card-detail-container {
+    padding: 20px;
+  }
+  
+  .left-section {
+    max-width: 100%;
+  }
+  
+  .right-section {
+    max-width: 100%;
+  }
+  
+  .print-item {
+    width: 100%;
+  }
 }
 
 .card-image-section {
@@ -683,6 +728,7 @@ onMounted(() => {
   display: flex;
   gap: 24px;
   padding: 12px 0;
+  flex-wrap: wrap;
 }
 
 .stat-item {
@@ -713,6 +759,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 6px;
+  flex-wrap: wrap;
 }
 
 .meta-label {
@@ -736,6 +783,44 @@ onMounted(() => {
   gap: 12px;
   flex-wrap: wrap;
   padding: 16px 0;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.card-actions .el-button {
+  width: 100% !important;
+  justify-content: center !important;
+  height: 48px !important;
+  border-radius: 8px !important;
+  padding: 0 24px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  min-width: 0 !important;
+}
+
+.card-actions .el-button:first-child {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+  color: white !important;
+  border: none !important;
+}
+
+.card-actions .el-button:last-child {
+  background: #ffffff !important;
+  color: #4b5563 !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+.card-actions .el-button span {
+  font-size: 14px !important;
+}
+
+.card-actions .el-button .el-icon {
+  font-size: 16px !important;
 }
 
 .legality-section {
@@ -848,7 +933,7 @@ onMounted(() => {
 
 .print-item {
   flex-shrink: 0;
-  width: 100%;
+  width: 75%;
   cursor: pointer;
   transition: all 0.3s ease;
   border-radius: 8px;
@@ -905,27 +990,78 @@ onMounted(() => {
   margin: 0;
 }
 
-@media (max-width: 768px) {
+/* 响应式设计 */
+@media (max-width: 1024px) {
+  /* iPad 横屏 */
   .card-detail-container {
-    padding: 20px;
+    padding: 24px;
+    gap: 20px;
   }
   
-  .main-content {
+  .right-section {
+    width: 380px;
+    min-width: 340px;
+  }
+  
+  .card-image {
+    max-width: 400px;
+  }
+  
+  .card-name {
+    font-size: 1.5rem;
+  }
+  
+  .legality-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  /* iPad 竖屏 */
+  .card-detail-view {
+    padding: 16px 16px 60px 16px;
+  }
+  
+  .card-detail-container {
     flex-direction: column;
+    padding: 20px;
+    gap: 24px;
   }
   
   .right-section {
     width: 100%;
     min-width: auto;
-    margin-top: 24px;
+    margin-top: 0;
+  }
+  
+  .card-image-section {
+    min-height: 300px;
   }
   
   .card-image {
-    max-height: 400px;
+    max-width: 320px;
+    max-height: 450px;
   }
   
   .card-name {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
+  }
+  
+  .card-stats {
+    gap: 16px;
+  }
+  
+  .card-meta {
+    gap: 12px 16px;
+  }
+  
+  .card-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .card-actions .el-button {
+    width: 100%;
   }
   
   .prints-section {
@@ -935,6 +1071,135 @@ onMounted(() => {
   
   .prints-list {
     max-height: 300px;
+  }
+  
+  .print-item {
+    padding: 6px;
+  }
+  
+  .print-image {
+    width: 40px;
+  }
+  
+  .print-set {
+    font-size: 0.7rem;
+  }
+  
+  .print-code {
+    font-size: 0.6rem;
+  }
+  
+  .print-date {
+    font-size: 0.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  /* 安卓手机 */
+  .card-detail-view {
+    padding: 12px 12px 40px 12px;
+  }
+  
+  .card-detail-container {
+    padding: 16px;
+  }
+  
+  .card-image {
+    max-width: 280px;
+    max-height: 380px;
+  }
+  
+  .card-name {
+    font-size: 1.2rem;
+  }
+  
+  .card-type {
+    font-size: 0.9rem;
+  }
+  
+  .oracle-text {
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+  
+  .oracle-text :deep(.mana-symbol-inline) {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .flavor-text {
+    font-size: 0.8rem;
+  }
+  
+  .stat-label {
+    font-size: 0.8rem;
+  }
+  
+  .stat-value {
+    font-size: 1.1rem;
+  }
+  
+  .meta-label {
+    font-size: 0.8rem;
+  }
+  
+  .meta-value {
+    font-size: 0.8rem;
+  }
+  
+  .card-actions {
+    gap: 8px !important;
+  }
+  
+  .card-actions .el-button {
+    height: 44px !important;
+    font-size: 13px !important;
+    padding: 0 16px !important;
+  }
+  
+  .card-actions .el-button span {
+    font-size: 13px !important;
+  }
+  
+  .card-actions .el-button .el-icon {
+    font-size: 14px !important;
+  }
+  
+  .legality-section h3 {
+    font-size: 0.9rem;
+  }
+  
+  .legality-item {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+  }
+  
+  .legality-status {
+    font-size: 0.65rem;
+  }
+  
+  .prints-section {
+    padding: 12px;
+  }
+  
+  .prints-section h3 {
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+  }
+  
+  .print-item {
+    flex-direction: column;
+    text-align: center;
+    padding: 12px;
+  }
+  
+  .print-info {
+    text-align: center;
+  }
+  
+  .print-set {
+    white-space: normal;
+    overflow: visible;
   }
 }
 </style>
