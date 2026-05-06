@@ -59,6 +59,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import { rarityMap, rarityTypeMap, symbolMap, formatManaCostHtml } from '@/utils/card'
 
 const props = defineProps({
   card: {
@@ -126,96 +127,12 @@ const cardDisplayName = computed(() => {
   return validName || '未知卡牌'
 })
 
-const symbolMap = {
-  // 单色符号
-  'W': 'white.svg', 
-  'U': 'blue.svg', 
-  'B': 'black.svg', 
-  'R': 'red.svg', 
-  'G': 'green.svg', 
-  'C': 'card-symbol-C.svg',
-  // 双色符号（带斜杠）
-  'W/U': 'card-symbol-WU.svg', 
-  'W/B': 'card-symbol-WB.svg', 
-  'U/B': 'card-symbol-UB.svg', 
-  'U/R': 'card-symbol-UR.svg',
-  'B/R': 'card-symbol-BR.svg', 
-  'B/G': 'card-symbol-BG.svg', 
-  'R/G': 'card-symbol-RG.svg', 
-  'R/W': 'card-symbol-RW.svg',
-  'G/W': 'card-symbol-GW.svg', 
-  'G/U': 'card-symbol-GU.svg',
-  // 双色符号（反向顺序）
-  'U/W': 'card-symbol-WU.svg',
-  'B/W': 'card-symbol-WB.svg',
-  'B/U': 'card-symbol-UB.svg',
-  'R/U': 'card-symbol-UR.svg',
-  'R/B': 'card-symbol-BR.svg',
-  'G/B': 'card-symbol-BG.svg',
-  'G/R': 'card-symbol-RG.svg',
-  'W/R': 'card-symbol-RW.svg',
-  'W/G': 'card-symbol-GW.svg',
-  'U/G': 'card-symbol-GU.svg',
-  // 双色符号（不带斜杠，API可能返回这种格式）
-  'WU': 'card-symbol-WU.svg',
-  'WB': 'card-symbol-WB.svg',
-  'UB': 'card-symbol-UB.svg',
-  'UR': 'card-symbol-UR.svg',
-  'BR': 'card-symbol-BR.svg',
-  'BG': 'card-symbol-BG.svg',
-  'RG': 'card-symbol-RG.svg',
-  'RW': 'card-symbol-RW.svg',
-  'GW': 'card-symbol-GW.svg',
-  'GU': 'card-symbol-GU.svg',
-  // 单色非瑞
-  'W/P': 'card-symbol-WP.svg', 'U/P': 'card-symbol-UP.svg', 'B/P': 'card-symbol-BP.svg',
-  'R/P': 'card-symbol-RP.svg', 'G/P': 'card-symbol-GP.svg',
-  // XYZ
-  'X': 'card-symbol-X.svg', 'Y': 'card-symbol-X.svg', 'Z': 'card-symbol-X.svg',
-  // 数字符号（0-16）
-  '0': 'card-symbol-1.svg', 
-  '1': 'card-symbol-1.svg', 
-  '2': 'card-symbol-2.svg', 
-  '3': 'card-symbol-3.svg',
-  '4': 'card-symbol-4.svg', 
-  '5': 'card-symbol-5.svg', 
-  '6': 'card-symbol-6.svg', 
-  '7': 'card-symbol-7.svg',
-  '8': 'card-symbol-8.svg', 
-  '9': 'card-symbol-9.svg', 
-  '10': 'card-symbol-10.svg',
-  '11': 'card-symbol-11.svg', 
-  '12': 'card-symbol-12.svg', 
-  '13': 'card-symbol-13.svg',
-  '14': 'card-symbol-14.svg', 
-  '15': 'card-symbol-15.svg', 
-  '16': 'card-symbol-16.svg',
-  // 其他符号
-  'T': 'card-symbol-T.svg', 
-  'Q': 'card-symbol-T.svg',
-}
-
 const cardManaCostHtml = computed(() => {
   const card = props.card
   
-  // 优先使用 mana_cost 字段（标准格式如 {U}{2}{B}）
+  // 使用工具函数格式化法术力费用
   if (card.mana_cost) {
-    // 匹配所有 {xxx} 格式的符号
-    const symbols = card.mana_cost.match(/\{([^}]+)\}/g) || []
-    
-    return symbols.map(symbol => {
-      // 提取符号值并转换为大写
-      const value = symbol.slice(1, -1).toUpperCase()
-      
-      // 直接从映射中查找
-      const svgFile = symbolMap[value]
-      if (svgFile) {
-        return `<img src="/symbols/${svgFile}" alt="${value}" class="card-mana-symbol-img" />`
-      }
-      
-      // 如果都匹配不到，显示文本
-      return `<span class="card-mana-symbol">{${value}}</span>`
-    }).join('')
+    return formatManaCostHtml(card.mana_cost)
   }
   
   // 备用：解析 mana_cost_html 中的类名
@@ -248,25 +165,16 @@ const cardManaCostHtml = computed(() => {
 })
 
 const rarityType = computed(() => {
-  const typeMap = {
-    'common': 'info',
-    'uncommon': 'success',
-    'rare': 'warning',
-    'mythic': 'danger'
-  }
-  return typeMap[props.card.rarity] || 'info'
+  return rarityTypeMap[props.card.rarity] || 'info'
 })
 
 const rarityText = computed(() => {
-  const textMap = {
-    'common': '普通',
-    'uncommon': '非普通',
-    'rare': '稀有',
-    'mythic': '秘稀',
+  const extendedMap = {
+    ...rarityMap,
     'special': '特殊',
     'bonus': '奖励'
   }
-  return textMap[props.card.rarity] || props.card.rarity
+  return extendedMap[props.card.rarity] || props.card.rarity
 })
 
 const handleClick = () => {
