@@ -5,22 +5,24 @@
       <div class="card-image-wrapper">
         <img
           :src="imageUrl"
-          :alt="card.zhs_name || card.name"
+          :alt="cardDisplayName"
           class="card-image"
           loading="lazy"
           @error="handleImageError"
         />
+        <!-- 图片加载失败时显示卡牌名称 -->
+        <div v-if="!imageUrl" class="image-placeholder">
+          <span class="placeholder-name">{{ cardDisplayName }}</span>
+        </div>
       </div>
       <div class="card-info">
-        <h3 class="card-name" :title="card.zhs_name || card.name">{{ card.zhs_name || card.name }}</h3>
+        <h3 class="card-name" :title="cardDisplayName">{{ cardDisplayName }}</h3>
         <div class="card-set-row">
-          <span class="card-set">{{ card.set_translated_name || card.set_name }} ({{ card.set.toUpperCase() }})</span>
-          <div class="card-mana-cost" v-html="manaCostHtml"></div>
+          <span class="card-set">{{ card.set_translated_name || card.set_name || card.set }} ({{ card.set?.toUpperCase() || 'N/A' }})</span>
         </div>
-        <p class="card-type">{{ card.zhs_type_line || card.type_line }}</p>
+        <p class="card-type">{{ card.display_type_line || card.zhs_type_line || card.type_line || 'N/A' }}</p>
         <div class="card-footer">
           <el-tag :type="rarityType" size="small">{{ rarityText }}</el-tag>
-          <span class="card-price">{{ price }}</span>
         </div>
       </div>
     </template>
@@ -30,21 +32,25 @@
       <div class="list-image-wrapper">
         <img
           :src="imageUrl"
-          :alt="card.zhs_name || card.name"
+          :alt="cardDisplayName"
           class="list-image"
           loading="lazy"
           @error="handleImageError"
         />
+        <!-- 图片加载失败时显示卡牌名称 -->
+        <div v-if="!imageUrl" class="list-image-placeholder">
+          <span>{{ cardDisplayName }}</span>
+        </div>
       </div>
       <div class="list-info">
-        <h3 class="list-name" :title="card.zhs_name || card.name">{{ card.zhs_name || card.name }}</h3>
-        <p class="list-type">{{ card.zhs_type_line || card.type_line }}</p>
+        <h3 class="list-name" :title="cardDisplayName">{{ cardDisplayName }}</h3>
+        <p class="list-type">{{ card.display_type_line || card.zhs_type_line || card.type_line || 'N/A' }}</p>
       </div>
       <div class="list-right">
-        <div class="list-mana-cost" v-html="manaCostHtml"></div>
+        <div class="list-mana-cost" v-html="cardManaCostHtml"></div>
         <div class="list-set">
-          <span class="list-set-icon">{{ card.set.toUpperCase() }}</span>
-          <span class="list-set-number">{{ card.collector_number }}</span>
+          <span class="list-set-icon">{{ card.set?.toUpperCase() || 'N/A' }}</span>
+          <span class="list-set-number">{{ card.collector_number || card.number || 'N/A' }}</span>
         </div>
       </div>
     </template>
@@ -68,54 +74,177 @@ const props = defineProps({
 const emit = defineEmits(['click'])
 
 const imageUrl = computed(() => {
-  return props.card.zhs_image_uris?.normal || 
-         props.card.zhs_image_uris?.small || 
-         props.card.image_uris?.normal || 
-         props.card.image_uris?.small || 
-         props.card.card_faces?.[0]?.image_uris?.normal || 
-         ''
+  const card = props.card
+  
+  // 尝试多种图片来源 - 根据API返回的实际字段
+  const image = 
+    // API返回的主要图片字段
+    card.image_url ||
+    card.img ||
+    card.image ||
+    // 中文图片优先
+    card.zhs_image_uris?.normal || 
+    card.zhs_image_uris?.small ||
+    card.zhs_image_uris?.large ||
+    // 英文图片
+    card.image_uris?.normal || 
+    card.image_uris?.small ||
+    card.image_uris?.large ||
+    // 双面卡牌
+    card.card_faces?.[0]?.zhs_image_uris?.normal ||
+    card.card_faces?.[0]?.image_uris?.normal ||
+    card.card_faces?.[0]?.zhs_image_uris?.small ||
+    card.card_faces?.[0]?.image_uris?.small ||
+    ''
+  
+  return image
+})
+
+// 确保始终有卡牌名称显示 - 使用API返回的正确字段名
+const cardDisplayName = computed(() => {
+  const card = props.card
+  
+  // 尝试多种可能的名称字段（按优先级排序）
+  const names = [
+    // API返回的中文名称字段
+    card.display_name_zh,
+    // API返回的英文名称字段
+    card.display_name,
+    // 其他可能的字段名
+    card.zhs_name,
+    card.name,
+    card.name_zh,
+    card.chinese_name,
+    card.oracle_id,
+    card.id
+  ]
+  
+  // 过滤空值并返回第一个有效名称
+  const validName = names.find(n => n && typeof n === 'string' && n.trim())
+  
+  // 如果都为空，返回默认值
+  return validName || '未知卡牌'
 })
 
 const symbolMap = {
-  'W': 'white.svg', 'U': 'blue.svg', 'B': 'black.svg', 'R': 'red.svg', 'G': 'green.svg', 'C': 'card-symbol-C.svg',
-  'W/U': 'card-symbol-WU.svg', 'W/B': 'card-symbol-WB.svg', 'U/B': 'card-symbol-UB.svg', 'U/R': 'card-symbol-UR.svg',
-  'B/R': 'card-symbol-BR.svg', 'B/G': 'card-symbol-BG.svg', 'R/G': 'card-symbol-RG.svg', 'R/W': 'card-symbol-RW.svg',
-  'G/W': 'card-symbol-GW.svg', 'G/U': 'card-symbol-GU.svg',
+  // 单色符号
+  'W': 'white.svg', 
+  'U': 'blue.svg', 
+  'B': 'black.svg', 
+  'R': 'red.svg', 
+  'G': 'green.svg', 
+  'C': 'card-symbol-C.svg',
+  // 双色符号（带斜杠）
+  'W/U': 'card-symbol-WU.svg', 
+  'W/B': 'card-symbol-WB.svg', 
+  'U/B': 'card-symbol-UB.svg', 
+  'U/R': 'card-symbol-UR.svg',
+  'B/R': 'card-symbol-BR.svg', 
+  'B/G': 'card-symbol-BG.svg', 
+  'R/G': 'card-symbol-RG.svg', 
+  'R/W': 'card-symbol-RW.svg',
+  'G/W': 'card-symbol-GW.svg', 
+  'G/U': 'card-symbol-GU.svg',
+  // 双色符号（反向顺序）
+  'U/W': 'card-symbol-WU.svg',
+  'B/W': 'card-symbol-WB.svg',
+  'B/U': 'card-symbol-UB.svg',
+  'R/U': 'card-symbol-UR.svg',
+  'R/B': 'card-symbol-BR.svg',
+  'G/B': 'card-symbol-BG.svg',
+  'G/R': 'card-symbol-RG.svg',
+  'W/R': 'card-symbol-RW.svg',
+  'W/G': 'card-symbol-GW.svg',
+  'U/G': 'card-symbol-GU.svg',
+  // 双色符号（不带斜杠，API可能返回这种格式）
+  'WU': 'card-symbol-WU.svg',
+  'WB': 'card-symbol-WB.svg',
+  'UB': 'card-symbol-UB.svg',
+  'UR': 'card-symbol-UR.svg',
+  'BR': 'card-symbol-BR.svg',
+  'BG': 'card-symbol-BG.svg',
+  'RG': 'card-symbol-RG.svg',
+  'RW': 'card-symbol-RW.svg',
+  'GW': 'card-symbol-GW.svg',
+  'GU': 'card-symbol-GU.svg',
   // 单色非瑞
   'W/P': 'card-symbol-WP.svg', 'U/P': 'card-symbol-UP.svg', 'B/P': 'card-symbol-BP.svg',
   'R/P': 'card-symbol-RP.svg', 'G/P': 'card-symbol-GP.svg',
-  // 双色非瑞
-  'W/U/P': 'card-symbol-WUP.svg', 'U/W/P': 'card-symbol-WUP.svg',
-  'W/B/P': 'card-symbol-WBP.svg', 'B/W/P': 'card-symbol-WBP.svg',
-  'U/B/P': 'card-symbol-UBP.svg', 'B/U/P': 'card-symbol-UBP.svg',
-  'U/R/P': 'card-symbol-URP.svg', 'R/U/P': 'card-symbol-URP.svg',
-  'B/R/P': 'card-symbol-BRP.svg', 'R/B/P': 'card-symbol-BRP.svg',
-  'B/G/P': 'card-symbol-BGP.svg', 'G/B/P': 'card-symbol-BGP.svg',
-  'R/G/P': 'card-symbol-RGP.svg', 'G/R/P': 'card-symbol-RGP.svg',
-  'R/W/P': 'card-symbol-RWP.svg', 'W/R/P': 'card-symbol-RWP.svg',
-  'G/W/P': 'card-symbol-GWP.svg', 'W/G/P': 'card-symbol-GWP.svg',
-  'G/U/P': 'card-symbol-GUP.svg', 'U/G/P': 'card-symbol-GUP.svg',
+  // XYZ
   'X': 'card-symbol-X.svg', 'Y': 'card-symbol-X.svg', 'Z': 'card-symbol-X.svg',
-  '0': 'card-symbol-1.svg', '1': 'card-symbol-1.svg', '2': 'card-symbol-2.svg', '3': 'card-symbol-3.svg',
-  '4': 'card-symbol-4.svg', '5': 'card-symbol-5.svg', '6': 'card-symbol-6.svg', '7': 'card-symbol-7.svg',
-  '8': 'card-symbol-8.svg', '9': 'card-symbol-9.svg', '10': 'card-symbol-10.svg',
-  '11': 'card-symbol-11.svg', '12': 'card-symbol-12.svg', '13': 'card-symbol-13.svg',
-  '14': 'card-symbol-15.svg', '15': 'card-symbol-15.svg', '16': 'card-symbol-16.svg',
-  'T': 'card-symbol-T.svg', 'Q': 'card-symbol-T.svg',
+  // 数字符号（0-16）
+  '0': 'card-symbol-1.svg', 
+  '1': 'card-symbol-1.svg', 
+  '2': 'card-symbol-2.svg', 
+  '3': 'card-symbol-3.svg',
+  '4': 'card-symbol-4.svg', 
+  '5': 'card-symbol-5.svg', 
+  '6': 'card-symbol-6.svg', 
+  '7': 'card-symbol-7.svg',
+  '8': 'card-symbol-8.svg', 
+  '9': 'card-symbol-9.svg', 
+  '10': 'card-symbol-10.svg',
+  '11': 'card-symbol-11.svg', 
+  '12': 'card-symbol-12.svg', 
+  '13': 'card-symbol-13.svg',
+  '14': 'card-symbol-14.svg', 
+  '15': 'card-symbol-15.svg', 
+  '16': 'card-symbol-16.svg',
+  // 其他符号
+  'T': 'card-symbol-T.svg', 
+  'Q': 'card-symbol-T.svg',
 }
 
-const manaCostHtml = computed(() => {
-  if (!props.card.mana_cost) return ''
+const cardManaCostHtml = computed(() => {
+  const card = props.card
   
-  const symbols = props.card.mana_cost.match(/\{([^}]+)\}/g) || []
-  return symbols.map(symbol => {
-    const value = symbol.slice(1, -1)
-    const svgFile = symbolMap[value]
-    if (svgFile) {
-      return `<img src="/symbols/${svgFile}" alt="${value}" class="card-mana-symbol-img" />`
-    }
-    return `<span class="card-mana-symbol">${value}</span>`
-  }).join('')
+  // 优先使用 mana_cost 字段（标准格式如 {U}{2}{B}）
+  if (card.mana_cost) {
+    // 匹配所有 {xxx} 格式的符号
+    const symbols = card.mana_cost.match(/\{([^}]+)\}/g) || []
+    
+    return symbols.map(symbol => {
+      // 提取符号值并转换为大写
+      const value = symbol.slice(1, -1).toUpperCase()
+      
+      // 直接从映射中查找
+      const svgFile = symbolMap[value]
+      if (svgFile) {
+        return `<img src="/symbols/${svgFile}" alt="${value}" class="card-mana-symbol-img" />`
+      }
+      
+      // 如果都匹配不到，显示文本
+      return `<span class="card-mana-symbol">{${value}}</span>`
+    }).join('')
+  }
+  
+  // 备用：解析 mana_cost_html 中的类名
+  if (card.mana_cost_html && card.mana_cost_html.includes('ms-')) {
+    // 提取所有 ms-xxx 类名
+    const classMatches = card.mana_cost_html.match(/ms-[^\s"]+/g) || []
+    
+    // 过滤掉不需要的类
+    const symbolClasses = classMatches.filter(cls => 
+      !cls.includes('ms-cost') && 
+      !cls.includes('ms-shadow') &&
+      !cls.includes('ms-sr-only')
+    )
+    
+    return symbolClasses.map(cls => {
+      // 提取符号值（去掉 ms- 前缀）并转换为大写
+      const value = cls.slice(3).toUpperCase()
+      
+      // 直接从映射中查找
+      const svgFile = symbolMap[value]
+      if (svgFile) {
+        return `<img src="/symbols/${svgFile}" alt="${value}" class="card-mana-symbol-img" />`
+      }
+      
+      return `<span class="card-mana-symbol">{${value}}</span>`
+    }).join('')
+  }
+  
+  return ''
 })
 
 const rarityType = computed(() => {
@@ -140,11 +269,6 @@ const rarityText = computed(() => {
   return textMap[props.card.rarity] || props.card.rarity
 })
 
-const price = computed(() => {
-  return props.card.prices?.usd ? `$${props.card.prices.usd}` : 
-         (props.card.prices?.eur ? `€${props.card.prices.eur}` : '-')
-})
-
 const handleClick = () => {
   // 跳转到卡牌详情页面
   const cardId = props.card.id
@@ -155,12 +279,13 @@ const handleClick = () => {
 
 const handleImageError = (e) => {
   e.target.style.display = 'none'
-  // 显示错误占位符
+  // 显示错误占位符，包含卡牌名称
   const wrapper = e.target.parentElement
   if (wrapper) {
     const errorDiv = document.createElement('div')
     errorDiv.className = 'image-error'
-    errorDiv.innerHTML = '<span>图片加载失败</span>'
+    const cardName = props.card.zhs_name || props.card.name || '未知卡牌'
+    errorDiv.innerHTML = `<span>${cardName}</span><span class="error-text">图片加载失败</span>`
     wrapper.appendChild(errorDiv)
   }
 }
@@ -216,6 +341,74 @@ const handleImageError = (e) => {
   color: #a0a0b0;
   font-size: 0.9rem;
   background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%);
+  padding: 8px;
+  text-align: center;
+}
+
+.image-error span:first-child {
+  font-weight: 600;
+  color: #d0d0e0;
+  font-size: 1rem;
+  margin-bottom: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.image-error .error-text {
+  font-size: 0.75rem;
+  color: #707080;
+}
+
+/* 图片占位符样式 */
+.image-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #2d2d44 0%, #1a1a2e 100%);
+  padding: 12px;
+  text-align: center;
+}
+
+.image-placeholder .placeholder-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #e0e0f0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* 列表模式图片占位符 */
+.list-image-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #2d2d44 0%, #1a1a2e 100%);
+  padding: 4px;
+  text-align: center;
+}
+
+.list-image-placeholder span {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #e0e0f0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
 }
 
 .card-info {
@@ -246,30 +439,33 @@ const handleImageError = (e) => {
 
 .card-mana-cost {
   display: flex;
-  gap: 2px;
-  flex-wrap: wrap;
+  gap: 3px;
+  flex-wrap: nowrap;
   justify-content: flex-end;
+  align-items: center;
 }
 
 .card-mana-symbol-img {
-  width: 16px;
-  height: 16px;
-  vertical-align: middle;
+  width: 22px;
+  height: 22px;
+  display: inline-block;
+  flex-shrink: 0;
 }
 
 .card-mana-symbol {
-  width: 16px;
-  height: 16px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   font-weight: 700;
   background: linear-gradient(135deg, #ccc2c0 0%, #b8aeac 100%);
   color: #1a1a1a;
   border: 1px solid rgba(0, 0, 0, 0.2);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
 }
 
 .card-type {
@@ -287,12 +483,6 @@ const handleImageError = (e) => {
   align-items: center;
   padding-top: 12px;
   border-top: 1px solid var(--border-color);
-}
-
-.card-price {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #16a34a;
 }
 
 /* 列表模式样式 */

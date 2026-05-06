@@ -308,10 +308,37 @@ const searchBySet = async (setCode) => {
     }
     
     const data = await cardAPI.getCardsBySet(setCode)
-    cardStore.setCards(data.items || [])
-    cardStore.setTotalCount(data.count || 0)
-    cardStore.setHasMore(data.page < data.total_pages || false)
+    
+    console.log('=== API Response Debug ===')
+    console.log('Data type:', Array.isArray(data) ? 'Array' : typeof data)
+    console.log('Data keys:', !Array.isArray(data) && typeof data === 'object' ? Object.keys(data) : 'N/A')
+    console.log('Data length:', Array.isArray(data) ? data.length : data.count || data.total_count || 'N/A')
+    
+    // 处理不同的数据结构：可能是数组，也可能是包含 items 的对象
+    let cards = []
+    if (Array.isArray(data)) {
+      cards = data
+    } else if (data.items && Array.isArray(data.items)) {
+      cards = data.items
+    } else if (data.cards && Array.isArray(data.cards)) {
+      cards = data.cards
+    } else {
+      // 尝试其他可能的字段
+      console.log('Unexpected data structure:', JSON.stringify(data).slice(0, 1000))
+    }
+    
+    const count = data.count || data.total_count || cards.length
+    
+    console.log('Final cards count:', cards.length)
+    console.log('First card keys:', cards.length > 0 ? Object.keys(cards[0]).slice(0, 20) : 'No cards')
+    console.log('First card sample:', cards.length > 0 ? JSON.stringify(cards[0], null, 2).slice(0, 800) : 'No cards')
+    
+    cardStore.setCards(cards)
+    cardStore.setTotalCount(count)
+    cardStore.setHasMore((data.page || 1) < (data.total_pages || 1) || false)
   } catch (error) {
+    console.error('Search by set error:', error)
+    
     // 检查是否是空结果（0张牌的情况）
     if (error.response?.status === 404 || error.response?.data?.code === 'not_found') {
       cardStore.setCards([])
